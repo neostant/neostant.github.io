@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Cat Generator</title>
+    </head>
+    <body style="background-color:#111;color:#FFF">
+        <h1>Cat Generator</h1>
+        <form>
+            <input type="checkbox" id="lowquality" name="lowquality" checked>
+            <label for="lowquality">low quality</label>
+            <br><input type="submit" value="New cat" /><br><br>
+            
+        </form>
+    </body>
+</html>
+
+<script>
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const lowquality = urlParams.get('lowquality');
+    if (!lowquality) {
+    document.getElementById('lowquality').checked = false;
+    }
+
+    var emojis = ['red-heart_2764-fe0f.png', 'thumbs-up_1f44d.png', 'thumbs-down_1f44e.png', 'fire_1f525.png', 'smiling-face-with-heart-eyes_1f60d.png',
+'orange-heart_1f9e1.png', 'purple-heart_1f49c.png', 'blue-heart_1f499.png', 'green-heart_1f49a.png', 'yellow-heart_1f49b.png', 'beating-heart_1f493.png', ]
+
+    const imageUrl = `https://corsproxy.io/?https://d2ph5fj80uercy.cloudfront.net/06/cat${Math.floor(5000**Math.random())}.jpg`;
+    const img = new Image();
+
+    fetch(imageUrl)
+    .then(response => response.blob())
+    .then(blob => {
+        const imageUrl = URL.createObjectURL(blob);
+        img.src = imageUrl;
+        img.id = "cat"
+        img.style = "margin-right: 10px;"
+        document.body.appendChild(img);
+
+        const canvas = document.createElement('canvas');
+        canvas.id="canvas"
+        const ctx = canvas.getContext('2d');
+        img.onload = function() {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let data = imageData.data;
+
+        if (lowquality) {
+            canvas.width /= Math.floor(5*Math.random()) + 1;
+            canvas.height /= Math.floor(5*Math.random()) + 1;
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+            data = imageData.data;
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        const emojiSize = Math.min(canvas.width, canvas.height) / 2;
+        const emojiX = Math.random() * (canvas.width - emojiSize);
+        const emojiY = Math.random() * (canvas.height - emojiSize);
+        const emoji = new Image();
+        emoji.src = 'https://corsproxy.io/?https://em-content.zobj.net/thumbs/120/twitter/322/' + emojis[Math.floor(Math.random() * emojis.length)];
+        emoji.onload = function() {
+            ctx.drawImage(emoji, emojiX, emojiY, emojiSize, emojiSize);
+            document.body.appendChild(canvas);
+        };
+        };
+
+        canvas.style.width = "256px"
+        canvas.style.height = "256px"
+        
+    });
+
+</script>
